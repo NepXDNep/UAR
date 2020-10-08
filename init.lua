@@ -173,35 +173,38 @@ end
 function UAR:CheckMouseHit()
     local raycastParams = RaycastParams.new()
     raycastParams.FilterType = Enum.RaycastFilterType.Whitelist
-    table.foreach(self.GetPlayersCharacters(), function(_, char) table.insert(raycastParams.FilterDescendantsInstances, char) end)
+    table.foreach(self.GetPlayersCharacters(), function(plr, char)
+        if plr ~= lplayer then 
+            table.insert(raycastParams.FilterDescendantsInstances, char)
+        end
+     end)
 
     local raycastResult = workspace:Raycast(mouse.UnitRay.Origin, mouse.UnitRay.Direction * 5000, raycastParams)
     return (raycastResult and self:WallCheck(raycastResult.Instance)) and raycastResult or false
 end
 
-local triggerBotConnection
-local function UAR.CheckTrigger()
-    local mouseHit = UAR:CheckMouseHit()
-    -- do stuff
-    return    
-end
+local triggerThread = coroutine.wrap(function()
+    while runService.Heartbeat:wait() do
+        if UAR.Settings.Triggerbot then
+            local mouseHit = self:CheckMouseHit()
+            if mouseHit then
+                local hitplr = players:GetPlayerFromCharacter(mouseHit.Instance.Parent) or (function()
+                    for plr, char in next, UAR.GetPlayersCharacters() do
+                        if plr ~= lplayer then
+                            if mouseHit.Instance:IsDescendantOf(char) then return plr end
+                        end
+                    end
+                end)()
 
-if UAR.Settings.Triggerbot then
-    triggerBotConnection = runService.Stepped:Connect(UAR.CheckTrigger)
-end
+                if hitplr and UAR.TeamCheck(hitplr, not UAR.Settings.TeamCheck) then
 
-UAR.SettingsChanged:Connect(function(key, value)
-    if key == "Triggerbot" then
-        if not value then
-            if checkMouseHitConnection then
-                checkMouseHitConnection:Disconnect()
-            end
-        else
-            if not checkMouseHitConnection then
-                checkMouseHitConnection = runService.Stepped:Connect(checkMouseHitFunction)
+                end
             end
         end
     end
+end)()
+
+UAR.SettingsChanged:Connect(function(key, value)
 end)
 
 return UAR
