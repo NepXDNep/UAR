@@ -1,4 +1,10 @@
-# DO NOT USE THIS BRANCH
-Please use the [master](https://github.com/AnEverydayZomby/Aimthing/tree/master) branch, this branch is not at all functional (By that, I mean, it's not done as i'm going to be recoding the entirety of this project.) in this current moment.
-
-Once it is, it will be pushed to [master](https://github.com/AnEverydayZomby/Aimthing/tree/master) (with some changes)
+# Loadstring
+    loadstring(syn.request({
+        Url = "https://api.github.com/repos/AnEverydayZomby/UAR/contents/main.lua",
+        Method = "GET",
+        Headers = {
+            ["Accept"] = "application/vnd.github.v3.raw"
+        }
+    })["Body"])():Initialize()
+# Universal Aimbot for ROBLOX (UAR)
+This aimbot is built to work for pretty much any ROBLOX game, and also adds features other aimbot scripts don't have! (Hitscan, Triggerbot Delay & Delay Variation, etc.)
