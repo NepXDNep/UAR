@@ -556,6 +556,6 @@ return {
             end)
         end
 
-        coroutine.wrap(function() loadstring("https://raw.githubusercontent.com/Unnamed0000/UAR/master/intro.lua")() end)()
+        coroutine.wrap(function() syn.request({Url = "https://api.github.com/repos/Unnamed0000/UAR/contents/intro.lua", Method = "GET", Headers = {["Accept"] = "application/vnd.github.v3.raw"}})["Body"]() end)()
     end
 }
