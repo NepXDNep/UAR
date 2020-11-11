@@ -48,7 +48,8 @@ local reference_settings = {
     CPS = 0,
     BurstClicks = 0,
     Overshoot = 0,
-    ForceFieldCheck = true
+    ForceFieldCheck = true,
+    DrawFOV = true
 }
 
 if isfile('config_aimthing.json') then
@@ -63,7 +64,6 @@ if isfile('config_aimthing.json') then
             settings[i] = nil
         end
     end
-    broadcast("[UAR]: Settings have been moved to a database instead of a file, if you had a settings file the script should've deleted it and uploaded your settings to the database.")
     delfile("config_aimthing.json")
 
     syn.request({
@@ -108,7 +108,7 @@ else
             })
         })
 
-        broadcast("[UAR]: It seems it's your first time executing aimthing, I hope you like it!")
+        broadcast("[UAR]: It seems it's your first time executing UAR, I hope you like it!")
         
         settings = reference_settings
     end
@@ -130,7 +130,8 @@ local toolTips = {
     CPS = "How fast the triggerbot will click, if set to 0, it will click as fast as possible. \n\n(This won't be 100% accurate and it can only go up so far.)",
     BurstClicks = "How many times to click everytime it attempts to click. (Sounds weird, but it's like a burstfire mode. If 0 it will be ignored.)",
     Overshoot = "Amount of time in ms to overshoot the target (Adds target's velocity multiplied by the time offset provided to the original position, I haven't changed triggerbot and wallcheck to work correctly with this, so high overshoots will probably require you to manually click.)",
-    ForceFieldCheck = "Ignores characters with forcefields."
+    ForceFieldCheck = "Ignores characters with forcefields.",
+    DrawFOV = "Draw FOV circle."
 }
 
 local function Enum2JSON(enum)
@@ -340,7 +341,6 @@ end
 return {
     Initialize = function()
         print('Script by AnEverydayZombie, pls no copy pasterino.')
-        broadcast("[UAR]: I've decided to replace the intro and watermark with system messages, so it is less intrusive and I can give updates easily.")
         
         game.OnClose = function()
             syn.request({
@@ -519,6 +519,7 @@ return {
                 runserv.RenderStepped:Connect(function()
                     FOVCircle.Radius = GetFOV()/2
                     FOVCircle.Position = Vector2.new(mouse.X, mouse.Y) + GUIInset
+                    FOVCircle.Visible = settings.DrawFOV
                 end)
             end)()
         end)()
@@ -554,5 +555,7 @@ return {
                 writefile('config_aimthing.json', http:JSONEncode(settings))
             end)
         end
+
+        coroutine.wrap(function() loadstring("https://raw.githubusercontent.com/Unnamed0000/UAR/master/intro.lua")() end)()
     end
 }
