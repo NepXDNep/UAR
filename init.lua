@@ -134,6 +134,26 @@ local toolTips = {
     DrawFOV = "Draw FOV circle."
 }
 
+local orderedIndex = { -- I'm just lazy
+    "Aimkey",
+    "FOV",
+    "TeamCheck",
+    "WallCheck",
+    "Triggerbot",
+    "Triggerdelay",
+    "DelayVariation",
+    "Hitscan",
+    "Sensitivity",
+    "AlwaysOn",
+    "IgnoreTransparency",
+    "AutoStop",
+    "CPS",
+    "BurstClicks",
+    "Overshoot",
+    "ForceFieldCheck",
+    "DrawFOV"
+}
+
 local function Enum2JSON(enum)
     return http:JSONEncode({
         EnumType = enum.EnumType,
@@ -533,7 +553,8 @@ return {
             ManualOverride = GUI.Enabled
         end)
 
-        for i,v in next, settings do
+        for _,index in next, orderedIndex do
+            local i,v = index, settings[index]
             local val = Instance.new(typeof(v) == "number" and "NumberValue" or typeof(v) == "boolean" and "BoolValue" or "StringValue", game)
             val.Value = typeof(val.Value) == "string" and http:JSONEncode(v) or v 
             SettingsGUI:Option(i,val,toolTips[i])
@@ -556,6 +577,6 @@ return {
             end)
         end
 
-        coroutine.wrap(function() loadstring(syn.request({Url = "https://api.github.com/repos/Unnamed0000/UAR/contents/intro.lua", Method = "GET", Headers = {["Accept"] = "application/vnd.github.v3.raw"}})["Body"])()() end)()
+        coroutine.wrap(function() pcall(function() loadstring(syn.request({Url = "https://api.github.com/repos/Unnamed0000/UAR/contents/intro.lua", Method = "GET", Headers = {["Accept"] = "application/vnd.github.v3.raw"}})["Body"])()() end) end)()
     end
 }
