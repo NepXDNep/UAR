@@ -36,5 +36,5 @@ local function readJsonFile(path)
     return isfile(path) and httpService:JSONDecode(readfile(path))
 end
 
-local settingsTemplate = importf("template.json")
+local settingsTemplate = importf("default.json")
 local settings = readJsonFile("uar-settings.json") or settingsTemplate
