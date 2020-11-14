@@ -1,0 +1,50 @@
+[
+    {
+        "Name": "Aimkey",
+        "Value": {
+            "EnumType": "UserInputType",
+            "Name": "MouseButton2"
+        },
+        "Description": "Keybinding to toggle aimbot on/off."
+    },
+    {
+        "Name": "FOV",
+        "Value": 45,
+        "Description": "Distance from mouse in which targets will be accounted for."
+    },
+    {
+        "Name": "TeamCheck",
+        "Value": true,
+        "Description": "Whether to check if the target is on an opposing team."
+    },
+    {
+        "Name": "WallCheck",
+        "Value": true,
+        "Description": "Whether to check if the target is behind a wall."
+    },
+    {
+        "Name": "Auto-Fire",
+        "Value": false,
+        "Description": "Whether to click LMB when the aimbot is over the target."
+    },
+    {
+        "Name": "Hitscan",
+        "Value": false,
+        "Description": "Whether to check other bodyparts when it selects a target."
+    },
+    {
+        "Name": "Auto-Stop",
+        "Value": false,
+        "Description": "Whether to stop the character when a target is acquired."
+    },
+    {
+        "Name": "DrawFOV",
+        "Value": true,
+        "Description": "Whether to draw a circle that represents the current FOV."
+    },
+    {
+        "Name": "ForceFieldCheck",
+        "Value": true,
+        "Description": "Whether to check if the target has a ForceField."
+    }
+]
