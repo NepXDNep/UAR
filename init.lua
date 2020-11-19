@@ -71,6 +71,11 @@ end
 local gameSpecificFuncs = importf("gameSpecificFuncs.lua")
 local UAR = {}
 UAR.__index = UAR
+UAR.config = {}
+
+for key, value in next, config do -- Just so I can index config by the name of certain properties, since in the JSON it's an array.
+    UAR.config[value.Name] = value.Value
+end
 
 for key, value in next, gameSpecificFuncs do -- Set functions to game-specific functions or default if it isn't needed.
     UAR[key] = value[gameId] or value['default']
@@ -80,7 +85,7 @@ function UAR:UpdateFOV()
     local viewportSize = camera.ViewportSize
     local pixelPerDegreeX = (camera.FieldOfView * (viewportSize.X / viewportSize.Y)) / viewportSize.X 
 
-    self.RealFOV = math.abs(config.FOV.Value / pixelPerDegreeX)
+    self.RealFOV = math.abs(self.config.FOV.Value / pixelPerDegreeX)
     return self.RealFOV
 end
 
@@ -165,18 +170,21 @@ function UAR:GetNearest()
     local characters = self:GetCharacters()
     local FOV = self.RealFOV or self:UpdateFOV()
     local mousePos = uis:GetMouseLocation()
+    local teamCheck = self.config.TeamCheck
+    local aimPartName = self.config.AimPartName
+    local hitScan = self.config.Hitscan
 
     local targets = {}
     for player, character in next, characters do
         if player ~= lplayer then
-            if not config.TeamCheck or self:TeamCheck(player) then
-                local aimPart = character:FindFirstChild(config.AimPartName.Value) or character.PrimaryPart
+            if not teamCheck or self:TeamCheck(player) then
+                local aimPart = character:FindFirstChild(aimPartName) or character.PrimaryPart
                 if aimPart then
                     local screenpoint, os = camera:WorldToViewportPoint(aimPart.Position)
                     if os then
-                        local inFOV, distance = self:PointInFOV(Vector2.new(screenpoint.X, screenpoint.Y)) or (config.Hitscan and self:RectInFOV(self:GetModelRect(character)))
+                        local inFOV, distance = self:PointInFOV(Vector2.new(screenpoint.X, screenpoint.Y)) or (hitScan and self:RectInFOV(self:GetModelRect(character)))
                         if inFOV then
-                            targets[#targets+1] = { Player = player, Character = character, Distance = distance }
+                            targets[#targets+1] = { Player = player, Character = character, Distance = distance, TargetPart = aimPart }
                         end
                     end
                 end
@@ -191,13 +199,13 @@ function UAR:GetNearest()
     for _, target in next, targets do
         local player = target.Player
         local character = target.Character
-        local targetPart = character:FindFirstChild(config.AimPartName) or character.PrimaryPart
+        local targetPart = target.TargetPart
         
         if targetPart then
             local visible = self:WallCheck(targetPart)
             if visible then
                 return targetPart, player, character
-            elseif config.Hitscan then
+            elseif hitScan then
                 local children = character:GetChildren()
                 for i, v in next, children do
                     if not v:IsA("BasePart") or v == targetPart then
