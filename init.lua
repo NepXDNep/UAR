@@ -23,10 +23,9 @@ local function importf(path)
 
     if response.Success then
         if fileExtension == 'lua' then
-            local success, val = loadstring(response.Body)
-            print(success, val)
-            if success then
-                return val()
+            local ret, err = loadstring(response.Body)
+            if ret then
+                return ret()
             end
         elseif fileExtension == 'json' then
             local success, val = pcall(httpService.JSONDecode, httpService, response.Body)
@@ -35,7 +34,7 @@ local function importf(path)
             end
         end
     end
-    print(response.Success, response.StatusCode)
+
     return response.Success, response.StatusCode
 end
 
