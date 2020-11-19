@@ -55,7 +55,12 @@ local function EnumFromJSON(json)
 end
 
 local configTemplate =   importf("default.json") -- Import default config file
-local config         =   ReadJSONFile("uarconfig.json") or configTemplate
+local config         =   ReadJSONFile("uarconfig.json")
+
+if not config then
+    config = configTemplate
+    writefile("uarconfig.json", httpService:JSONEncode(config))
+end
 
 for key, value in next, configTemplate do -- Validate config file
     if not config[key] or typeof(config[key]) ~= typeof(configTemplate[key]) then
@@ -64,7 +69,6 @@ for key, value in next, configTemplate do -- Validate config file
 end
 
 local gameSpecificFuncs = importf("gameSpecificFuncs.lua")
-print(gameSpecificFuncs)
 local UAR = {}
 UAR.__index = UAR
 
