@@ -1,5 +1,14 @@
 assert(syn, "This script uses synapse-exclusive functions, whether there are alternatives to these functions or not, this script will not function with other executors. (I don't really care about other executors so this will probably not change anytime soon.)")
 
+--[[ Locals ]]--
+local httpService =   game:GetService("HttpService")
+local uis         =   game:GetService("UserInputService")
+local players     =   game:GetService("Players")
+local lplayer     =   players.LocalPlayer
+local mouse       =   lplayer:GetMouse()
+local gameId      =   game.GameId
+local camera      =   workspace.CurrentCamera
+
 local function importf(path)
     local fileExtension = path:split('.')[2]
     assert(fileExtension == 'lua' or fileExtension == 'json', "importf can only import .json and .lua files.")
@@ -28,15 +37,6 @@ local function importf(path)
 
     return response.Success, response.StatusCode
 end
-
---[[ Locals ]]--
-local httpService =   game:GetService("HttpService")
-local uis         =   game:GetService("UserInputService")
-local players     =   game:GetService("Players")
-local lplayer     =   players.LocalPlayer
-local mouse       =   lplayer:GetMouse()
-local gameId      =   game.GameId
-local camera      =   workspace.CurrentCamera
 
 local function ReadJSONFile(path)
     return isfile(path) and httpService:JSONDecode(readfile(path))
