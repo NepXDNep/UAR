@@ -114,7 +114,7 @@ local function UAR:GetModelRect(model)
 end
 
 local function UAR:PointInFOV(point)
-    local mousePos = Vector2.new(mouse.X, mouse.Y)
+    local mousePos = uis:GetMouseLocation()
     local FOV = self.RealFOV or self:UpdateFOV()
     local distance = (mousePos - nearestPoint).magnitude
 
@@ -124,7 +124,7 @@ local function UAR:PointInFOV(point)
 end
 
 local function UAR:RectInFOV(rectPos, rectSize)
-    local mousePos = Vector2.new(mouse.X, mouse.Y)
+    local mousePos = uis:GetMouseLocation()
     local FOV = self.RealFOV or self:UpdateFOV()
     local nearestPoint = Vector2.new(math.max(rectPos.X, math.min(mousePos.X, rectPos.X + rectSize.X)), math.max(rectPos.Y, math.min(mousePos.Y, rectPos.Y + rectSize.Y)))
     local distance = (mousePos - nearestPoint).magnitude
@@ -156,41 +156,24 @@ local function UAR:WallCheck(target)
     return false
 end
 
-local function UAR:GetPriorityParts(model, goal)
-    assert(goal, "GetPriorityParts requires a goal-part to compare against other parts.")
-    local priorityParts = {}
-
-    for _,v in next, model:GetChildren() do
-        if v:IsA("BasePart") and v.Transparency ~= 1 then
-            priorityParts[#priorityParts+1] = v
-        end
-    end
-
-    table.sort(priorityParts, function(a, b)
-        return (a.Position - goal.Position).magnitude < (b.Position - goal.Position).magnitude
-    end)
-
-    table.foreach(priorityParts, function(key, value)
-        priorityParts[key] = tostring(value)
-    end)
-
-    return priorityParts
-end
-
 local function UAR:GetNearest()
     local characters = self:GetCharacters()
     local FOV = self.RealFOV or self:UpdateFOV()
-    local mousePos = Vector2.new(mouse.X, mouse.Y)
+    local mousePos = uis:GetMouseLocation()
 
     local targets = {}
     for player, character in next, characters do
-        local aimPart = character:FindFirstChild(config.AimPartName.Value) or character.PrimaryPart
-        if aimPart then
-            local screenpoint, os = camera:WorldToViewportPoint(aimPart.Position)
-            if os then
-                local inFOV, distance = self:PointInFOV(Vector2.new(screenpoint.X, screenpoint.Y)) or self:RectInFOV(self:GetModelRect(character))
-                if inFOV then
-                    targets[#targets+1] = { Player = player, Character = character, Distance = distance }
+        if player ~= lplayer then
+            if not config.TeamCheck or self:TeamCheck(player) then
+                local aimPart = character:FindFirstChild(config.AimPartName.Value) or character.PrimaryPart
+                if aimPart then
+                    local screenpoint, os = camera:WorldToViewportPoint(aimPart.Position)
+                    if os then
+                        local inFOV, distance = self:PointInFOV(Vector2.new(screenpoint.X, screenpoint.Y)) or (config.Hitscan and self:RectInFOV(self:GetModelRect(character)))
+                        if inFOV then
+                            targets[#targets+1] = { Player = player, Character = character, Distance = distance }
+                        end
+                    end
                 end
             end
         end
@@ -203,6 +186,38 @@ local function UAR:GetNearest()
     for _, target in next, targets do
         local player = target.Player
         local character = target.Character
+        local targetPart = character:FindFirstChild(config.AimPartName) or character.PrimaryPart
         
+        if targetPart then
+            local visible = self:WallCheck(targetPart)
+            if visible then
+                return targetPart, player, character
+            elseif config.Hitscan then
+                local children = character:GetChildren()
+                for i, v in next, children do
+                    if not v:IsA("BasePart") or v == targetPart then
+                        children[i] = nil
+                    end
+                end
+
+                table.sort(children, function(a, b)
+                    local screenpoint_a, os_a = camera:WorldToViewportPoint(a.Position)
+                    local screenpoint_b, os_b = camera:WorldToViewportPoint(b.Position)
+
+                    if not os_a or not os_b then
+                        return os_a and a or b
+                    end
+
+                    return (Vector2.new(screenpoint_a.X, screenpoint_a.Y) - mousePos).magnitude < (Vector2.new(screenpoint_b.X, screenpoint_b.Y) - mousePos).magnitude
+                end)
+
+                for i, v in next, children do
+                    local visible = self:WallCheck(v)
+                    if visible then
+                        return v, player, character
+                    end
+                end
+            end
+        end
     end
 end
