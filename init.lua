@@ -31,7 +31,7 @@ end
 
 --[[ Locals ]]--
 local httpService =   game:GetService("HttpService")
-local uis         =   game:GetService("UserInputSerivce")
+local uis         =   game:GetService("UserInputService")
 local players     =   game:GetService("Players")
 local lplayer     =   players.LocalPlayer
 local mouse       =   lplayer:GetMouse()
