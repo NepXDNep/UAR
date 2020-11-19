@@ -70,7 +70,7 @@ UAR.__index = UAR
 for key, value in next, gameSpecificFuncs do -- Set functions to game-specific functions or default if it isn't needed.
     UAR[key] = value[gameId] or value['default']
 end
-
+--[[
 local function UAR:UpdateFOV()
     local viewportSize = camera.ViewportSize
     local pixelPerDegreeX = (camera.FieldOfView * (viewportSize.X / viewportSize.Y)) / viewportSize.X 
@@ -78,7 +78,7 @@ local function UAR:UpdateFOV()
     self.RealFOV = math.abs(config.FOV.Value / pixelPerDegreeX)
     return self.RealFOV
 end
-
+]]
 local function UAR:GetModelRect(model)
     local orientation, size = model:GetBoundingBox()
     local corners = {
