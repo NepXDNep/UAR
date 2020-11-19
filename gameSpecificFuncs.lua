@@ -40,7 +40,7 @@ gameSpecificFuncs.GetCharacters = {
                 player.CharactedAdded:Connect(function(character)
                     addCharacter(character, player)
                 end)
-            end
+            end)
     
             return characterTable
         end)()
