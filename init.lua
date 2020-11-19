@@ -13,29 +13,21 @@ local function importf(path)
     local fileExtension = path:split('.')[2]
     assert(fileExtension == 'lua' or fileExtension == 'json', "importf can only import .json and .lua files.")
 
-    local response = syn.request({
-        Url = "https://api.github.com/repos/Unnamed0000/UAR/contents/"..path.."?ref=experimental",
-        Method = "Get",
-        Headers = {
-            Accept = "application/vnd.github.v3.raw"
-        }
-    })
+    local resposne = game:HttpGet("https://raw.githubusercontent.com/Unnamed0000/UAR/experimental/"..path, true)
 
-    if response.Success then
+    if response then
         if fileExtension == 'lua' then
-            local ret, err = loadstring(response.Body)
+            local ret, err = loadstring(response)
             if ret then
                 return ret()
             end
         elseif fileExtension == 'json' then
-            local success, val = pcall(httpService.JSONDecode, httpService, response.Body)
+            local success, val = pcall(httpService.JSONDecode, httpService, response)
             if success then
                 return val
             end
         end
     end
-
-    return response.Success, response.StatusCode
 end
 
 local function ReadJSONFile(path)
