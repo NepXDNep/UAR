@@ -24,6 +24,7 @@ local function importf(path)
     if response.Success then
         if fileExtension == 'lua' then
             local success, val = loadstring(response.Body)
+            print(success, val)
             if success then
                 return val()
             end
@@ -34,7 +35,7 @@ local function importf(path)
             end
         end
     end
-
+    print(response.Success, response.StatusCode)
     return response.Success, response.StatusCode
 end
 
@@ -64,6 +65,7 @@ for key, value in next, configTemplate do -- Validate config file
 end
 
 local gameSpecificFuncs = importf("gameSpecificFuncs.lua")
+print(gameSpecificFuncs)
 local UAR = {}
 UAR.__index = UAR
 
