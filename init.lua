@@ -85,7 +85,7 @@ function UAR:UpdateFOV()
     local viewportSize = camera.ViewportSize
     local pixelPerDegreeX = (camera.FieldOfView * (viewportSize.X / viewportSize.Y)) / viewportSize.X 
 
-    self.RealFOV = math.abs(self.config.FOV.Value / pixelPerDegreeX)
+    self.RealFOV = math.abs(self.config.FOV / pixelPerDegreeX)
     return self.RealFOV
 end
 
