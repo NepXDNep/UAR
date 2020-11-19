@@ -54,7 +54,7 @@ gameSpecificFuncs.GetCharacters = {
         if not setCharacterHash then
             for _,v in next, getgc() do
                 if type(v) == 'function' and not is_synapse_function(v) then
-                    if getinfo(v).name = 'setcharacterhash' then
+                    if getinfo(v).name == 'setcharacterhash' then
                         setCharacterHash = getupvalue(setCharacterHash, 3)
                         break
                     end
