@@ -221,3 +221,5 @@ local function UAR:GetNearest()
         end
     end
 end
+
+return UAR
