@@ -46,5 +46,10 @@
         "Name": "ForceFieldCheck",
         "Value": true,
         "Description": "Whether to check if the target has a ForceField."
+    },
+    {
+        "Name": "AimPartName",
+        "Value": "Head",
+        "Description": "Name of the part to aim at. (If it is not a valid member of the character then PrimaryPart will be used instead.)"
     }
 ]

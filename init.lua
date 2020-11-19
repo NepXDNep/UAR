@@ -31,6 +31,7 @@ end
 
 --[[ Locals ]]--
 local httpService =   game:GetService("HttpService")
+local uis         =   game:GetService("UserInputSerivce")
 local players     =   game:GetService("Players")
 local lplayer     =   players.LocalPlayer
 local mouse       =   lplayer:GetMouse()
@@ -70,29 +71,72 @@ for key, value in next, gameSpecificFuncs do -- Set functions to game-specific f
     UAR[key] = value[gameId] or value['default']
 end
 
-local function UAR:SetMousePosition()
-    return self.mousePos or (function()
-        local mousePos = self.mousePos
-        mousePos = Vector2.new(mouse.X, mouse.Y)
-        return mousePos
-    end)()
-end
-
-local function UAR:FOV()
+local function UAR:UpdateFOV()
     local viewportSize = camera.ViewportSize
     local pixelPerDegreeX = (camera.FieldOfView * (viewportSize.X / viewportSize.Y)) / viewportSize.X 
 
-    self.RealFOV = math.abs(config.FOV / pixelPerDegreeX)
+    self.RealFOV = math.abs(config.FOV.Value / pixelPerDegreeX)
     return self.RealFOV
 end
 
-local function UAR:InFOV(screenPoint)
-    return (screenPoint - (self.mousePos or UAR:SetMousePosition())).magnitude <= (self.RealFOV or UAR:FOV()) / 2
+local function UAR:GetModelRect(model)
+    local orientation, size = model:GetBoundingBox()
+    local corners = {
+        (orientation * CFrame.new(-size.X / 2, -size.Y / 2, -size.Z / 2)).p,
+        (orientation * CFrame.new(size.X / 2, -size.Y / 2, -size.Z / 2)).p,
+        (orientation * CFrame.new(-size.X / 2, -size.Y / 2, size.Z / 2)).p,
+        (orientation * CFrame.new(size.X / 2, -size.Y / 2, size.Z / 2)).p,
+        (orientation * CFrame.new(-size.X / 2, size.Y / 2, -size.Z / 2)).p,
+        (orientation * CFrame.new(size.X / 2, size.Y / 2, -size.Z / 2)).p,
+        (orientation * CFrame.new(-size.X / 2, size.Y / 2, size.Z / 2)).p,
+        (orientation * CFrame.new(size.X / 2, size.Y / 2, size.Z / 2)).p
+    }
+    
+    local minX, minY = math.huge, math.huge
+    local maxX, maxY = -math.huge, -math.huge
+    local onScreen = false
+    for _, corner in next, corners do
+        local screenpoint, os = camera:WorldToViewportPoint(corner)
+        local x, y = screenpoint.X, screenpoint.Y
+        minX = x < minX and x or minX
+        minY = y < minY and y or minY
+        maxX = x > maxX and x or maxX
+        maxY = y > maxY and y or maxY
+
+        if onscreen then
+            onScreen = os
+        end
+    end
+
+    if onScreen then
+        return Vector2.new(minX, minY), Vector2.new(maxX - minX, maxY - minY)
+    end
+end
+
+local function UAR:PointInFOV(point)
+    local mousePos = Vector2.new(mouse.X, mouse.Y)
+    local FOV = self.RealFOV or self:UpdateFOV()
+    local distance = (mousePos - nearestPoint).magnitude
+
+    if distance <= FOV then
+        return true, distance
+    end
+end
+
+local function UAR:RectInFOV(rectPos, rectSize)
+    local mousePos = Vector2.new(mouse.X, mouse.Y)
+    local FOV = self.RealFOV or self:UpdateFOV()
+    local nearestPoint = Vector2.new(math.max(rectPos.X, math.min(mousePos.X, rectPos.X + rectSize.X)), math.max(rectPos.Y, math.min(mousePos.Y, rectPos.Y + rectSize.Y)))
+    local distance = (mousePos - nearestPoint).magnitude
+
+    if distance <= FOV then
+        return true, distance
+    end
 end
 
 local function UAR:WallCheck(target)
-    local coords = camera:WorldToScreenPoint(target.Position)
-    local unit = camera:ScreenPointToRay(coords.X, coords.Y)
+    local coords = camera:WorldToViewportPoint(target.Position)
+    local unit = camera:ViewportPointToRay(coords.X, coords.Y)
     local ray = Ray.new(unit.Origin, unit.Direction * (camera.CFrame.p - target.Position).magnitude)
     local ignore = { camera, lplayer.Character }
     local hit
@@ -133,7 +177,32 @@ local function UAR:GetPriorityParts(model, goal)
     return priorityParts
 end
 
-local function UAR:GetNearestToCursor()
+local function UAR:GetNearest()
     local characters = self:GetCharacters()
-    local mousePos = self.mousePos or self:SetMousePosition()
+    local FOV = self.RealFOV or self:UpdateFOV()
+    local mousePos = Vector2.new(mouse.X, mouse.Y)
+
+    local targets = {}
+    for player, character in next, characters do
+        local aimPart = character:FindFirstChild(config.AimPartName.Value) or character.PrimaryPart
+        if aimPart then
+            local screenpoint, os = camera:WorldToViewportPoint(aimPart.Position)
+            if os then
+                local inFOV, distance = self:PointInFOV(Vector2.new(screenpoint.X, screenpoint.Y)) or self:RectInFOV(self:GetModelRect(character))
+                if inFOV then
+                    targets[#targets+1] = { Player = player, Character = character, Distance = distance }
+                end
+            end
+        end
+    end
+
+    table.sort(targets, function(a, b)
+        return a.Distance < b.Distance
+    end)
+
+    for _, target in next, targets do
+        local player = target.Player
+        local character = target.Character
+        
+    end
 end
