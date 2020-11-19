@@ -65,12 +65,13 @@ end
 
 local gameSpecificFuncs = importf("gameSpecificFuncs.lua")
 local UAR = {}
+UAR.__index = UAR
 
 for key, value in next, gameSpecificFuncs do -- Set functions to game-specific functions or default if it isn't needed.
     UAR[key] = value[gameId] or value['default']
 end
 
-local function UAR:UpdateFOV()
+function UAR:UpdateFOV()
     local viewportSize = camera.ViewportSize
     local pixelPerDegreeX = (camera.FieldOfView * (viewportSize.X / viewportSize.Y)) / viewportSize.X 
 
@@ -78,7 +79,7 @@ local function UAR:UpdateFOV()
     return self.RealFOV
 end
 
-local function UAR:GetModelRect(model)
+function UAR:GetModelRect(model)
     local orientation, size = model:GetBoundingBox()
     local corners = {
         (orientation * CFrame.new(-size.X / 2, -size.Y / 2, -size.Z / 2)).p,
@@ -112,7 +113,7 @@ local function UAR:GetModelRect(model)
     end
 end
 
-local function UAR:PointInFOV(point)
+function UAR:PointInFOV(point)
     local mousePos = uis:GetMouseLocation()
     local FOV = self.RealFOV or self:UpdateFOV()
     local distance = (mousePos - nearestPoint).magnitude
@@ -122,7 +123,7 @@ local function UAR:PointInFOV(point)
     end
 end
 
-local function UAR:RectInFOV(rectPos, rectSize)
+function UAR:RectInFOV(rectPos, rectSize)
     local mousePos = uis:GetMouseLocation()
     local FOV = self.RealFOV or self:UpdateFOV()
     local nearestPoint = Vector2.new(math.max(rectPos.X, math.min(mousePos.X, rectPos.X + rectSize.X)), math.max(rectPos.Y, math.min(mousePos.Y, rectPos.Y + rectSize.Y)))
@@ -133,7 +134,7 @@ local function UAR:RectInFOV(rectPos, rectSize)
     end
 end
 
-local function UAR:WallCheck(target)
+function UAR:WallCheck(target)
     local coords = camera:WorldToViewportPoint(target.Position)
     local unit = camera:ViewportPointToRay(coords.X, coords.Y)
     local ray = Ray.new(unit.Origin, unit.Direction * (camera.CFrame.p - target.Position).magnitude)
@@ -155,7 +156,7 @@ local function UAR:WallCheck(target)
     return false
 end
 
-local function UAR:GetNearest()
+function UAR:GetNearest()
     local characters = self:GetCharacters()
     local FOV = self.RealFOV or self:UpdateFOV()
     local mousePos = uis:GetMouseLocation()
