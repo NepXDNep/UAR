@@ -46,7 +46,7 @@ gameSpecificFuncs.GetCharacters = {
         end)()
     end,
 
-    113491250 = function(self)
+    [113491250] = function(self)
         local characterTable = self.CharacterTable
         local setCharacterHash = self.setCharacterHash
         characterTable = {}
