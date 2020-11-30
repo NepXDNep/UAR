@@ -190,7 +190,7 @@ function WorldToScreenPointWithTimeOffset(part, offset)
     assert(typeof(part) == 'Instance' and part:IsA("BasePart"), "Function argument requires a basepart.")
     assert(part.Parent:IsA("Model"), "Inproper character part.")
     local position = part.Position + part.Parent.PrimaryPart.Velocity*(offset/1000)
-    return {camera:WorldToScreenPoint(position)}
+    return {camera:WorldToViewportPoint(position)}
 end
 
 function GetPlayerAndCharacters()
@@ -227,7 +227,7 @@ function GetPlayerAndCharacters()
 end
 
 function WallCheck(target)
-    local vect3 = camera:WorldToScreenPoint(target.Position)
+    local vect3 = camera:WorldToViewportPoint(target.Position)
     local unit = camera:ScreenPointToRay(vect3.X, vect3.Y)
     local ray = Ray.new(unit.Origin, unit.Direction * 5000)
     local ignorelist = {camera}
@@ -299,7 +299,7 @@ function GetNearestInfo()
             if (not character:FindFirstChildOfClass("ForceField") and settings.ForceFieldCheck) or not settings.ForceFieldCheck then
                 local PriorityPart = character:FindFirstChild('Head') or character.PrimaryPart
                 if PriorityPart then
-                    local screenpoint, onscreen = camera:WorldToScreenPoint(PriorityPart.Position)
+                    local screenpoint, onscreen = camera:WorldToViewportPoint(PriorityPart.Position)
                     if (onscreen and screenpoint.Z > 0) and (mousePos - Vector2.new(screenpoint.X, screenpoint.Y)).magnitude <= FOV/2 then
                         if (settings.TeamCheck and TeamCheck(player)) or not settings.TeamCheck then
                             table.insert(result, {['player'] = player, ['character'] = character, ['magnitude'] = (Vector3.new(screenpoint.X, screenpoint.Y, screenpoint.Z/2) - Vector3.new(mouse.X, mouse.Y, 0.5)).magnitude})
